@@ -222,3 +222,17 @@ if res.status_code != 200:
 doc = indexclient.global_get("10.1000/182")
 print(doc.did) # >> "g.1234/03eed607-acb0-4532-b0ee-9e3766b1aa6e"
 ```
+
+### Restricted record discovery
+
+Reads and bulk discovery now preserve the client's configured authentication,
+including Gen3's requests-compatible bearer provider and IndexD Basic credentials.
+An explicit per-call authentication override still takes precedence. Anonymous
+clients remain anonymous. `create(..., visibility="restricted", authz=["/resource"])`
+and `document.visibility = "restricted"; document.update()` use IndexD's optional
+field without changing existing methods. A legacy document can add this field
+on update. Restricted records require download access on all authz resources;
+public metadata does not mean public file contents.
+
+Run the isolated transport tests with `pytest --noconftest tests/test_visibility.py`.
+Deploy the reviewed client revision together with the SDK revision that pins it.
