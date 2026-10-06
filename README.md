@@ -231,7 +231,9 @@ An explicit per-call authentication override still takes precedence. Anonymous
 clients remain anonymous. `create(..., visibility="restricted", authz=["/resource"])`
 and `document.visibility = "restricted"; document.update()` use IndexD's optional
 field without changing existing methods. A legacy document can add this field
-on update. Restricted records require download access on all authz resources;
+on update. Restricted discovery requires `indexd/read-metadata` on all authz resources;
+Fence download access uses the separate `fence/read-storage` action. Existing
+records and omitted visibility retain public metadata by default;
 public metadata does not mean public file contents.
 
 Run the isolated transport tests with `pytest --noconftest tests/test_visibility.py`.
