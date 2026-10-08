@@ -1,4 +1,4 @@
-"""Caller credentials and the opt-in visibility field survive client operations."""
+"""Caller credentials and existing AuthZ survive project-visible client operations."""
 
 import json
 from unittest.mock import MagicMock, patch
@@ -13,10 +13,10 @@ def test_reads_and_bulk_preserve_credentials():
     response.json.return_value = {
         "did": "private",
         "rev": "1",
-        "visibility": "restricted",
+        "authz": ["/private"],
     }
     with patch("indexclient.client.requests.get", return_value=response) as get:
-        assert client.get("private").visibility == "restricted"
+        assert client.get("private").authz == ["/private"]
         assert get.call_args.kwargs["auth"] is auth
         client._get("index", auth=("override", "password"))
         assert get.call_args.kwargs["auth"] == ("override", "password")
@@ -26,18 +26,18 @@ def test_reads_and_bulk_preserve_credentials():
         assert post.call_args.kwargs["auth"] is auth
 
 
-def test_visibility_can_be_added_to_legacy_document():
+def test_existing_authz_can_be_updated():
     client = IndexClient("https://commons.example/index", auth=("service", "password"))
     document = Document(
         client,
         "private",
         json={"did": "private", "rev": "1", "authz": ["/private"], "urls": []},
     )
-    document.visibility = "restricted"
-    assert document._doc_for_update()["visibility"] == "restricted"
+    document.authz = ["/private/updated"]
+    assert document._doc_for_update()["authz"] == ["/private/updated"]
 
 
-def test_create_serializes_visibility():
+def test_create_serializes_existing_authz():
     client = IndexClient("https://commons.example/index")
     response = MagicMock(status_code=200)
     response.json.return_value = {"did": "private", "rev": "1"}
@@ -48,6 +48,5 @@ def test_create_serializes_visibility():
             hashes={"md5": "a" * 32},
             size=1,
             authz=["/private"],
-            visibility="restricted",
         )
-        assert json.loads(post.call_args.kwargs["data"])["visibility"] == "restricted"
+        assert json.loads(post.call_args.kwargs["data"])["authz"] == ["/private"]

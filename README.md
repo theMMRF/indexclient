@@ -174,7 +174,7 @@ First: get a Document object of the desired record with one of the get methods
 Second: Update any of the records updatable attributes.
   - the format to do this is: `doc.attr = value`
       - eg: `doc.file_name = new_file_name`
-  - Updatable attributes are: file_name urls, version, metadata, acl, authz, visibility, urls_metadata, uploader
+  - Updatable attributes are: file_name urls, version, metadata, acl, authz, urls_metadata, uploader
 
 Lastly: Update all the local changes that were made to indexd using the
         Document patch method: doc.patch()
@@ -228,17 +228,10 @@ print(doc.did) # >> "g.1234/03eed607-acb0-4532-b0ee-9e3766b1aa6e"
 Reads and bulk discovery now preserve the client's configured authentication,
 including Gen3's requests-compatible bearer provider and IndexD Basic credentials.
 An explicit per-call authentication override still takes precedence. Anonymous
-clients remain anonymous. `create(..., visibility="restricted", authz=["/resource"])`
-and `document.visibility = "restricted"; document.patch()` use IndexD's optional
-field without changing existing methods. A legacy document can add this field
-on update. These controls require the paired patched IndexD server, which accepts
-`visibility` on create/update and enforces `indexd/read-metadata` on record reads;
-installing this client alone does not make an older server private.
+clients remain anonymous. Records retain the ordinary existing `authz` field;
+no per-record visibility flag is introduced. With IndexD's site-level
+`PROJECT_VISIBILITY_ENABLED=true` opt-in, reads require `indexd/read-metadata` on
+every `authz` resource. With the flag disabled, existing public metadata behavior
+is preserved. Fence separately authorizes downloads using `fence/read-storage`.
 
-Restricted discovery requires `indexd/read-metadata` on all authz resources;
-Fence download access uses the separate `fence/read-storage` action. Existing
-records and omitted visibility retain public metadata by default;
-public metadata does not mean public file contents.
-
-Run the isolated transport tests with `pytest --noconftest tests/test_visibility.py`.
-Deploy the reviewed client revision together with the SDK revision that pins it.
+Run isolated transport tests with `pytest --noconftest tests/test_visibility.py`.

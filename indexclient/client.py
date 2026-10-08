@@ -15,7 +15,6 @@ UPDATABLE_ATTRS = [
     "metadata",
     "acl",
     "authz",
-    "visibility",
     "urls_metadata",
     "description",
     "content_created_date",
@@ -249,7 +248,6 @@ class IndexClient(object):
         description=None,
         content_created_date=None,
         content_updated_date=None,
-        visibility=None,
     ):
         """Create a new entry in indexd
 
@@ -287,7 +285,6 @@ class IndexClient(object):
             "description": description,
             "content_created_date": content_created_date,
             "content_updated_date": content_updated_date,
-            "visibility": visibility,
         }
         if did:
             json["did"] = did
