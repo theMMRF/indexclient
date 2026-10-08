@@ -13,7 +13,7 @@ install:
 - pipenv graph
 script: pipenv run pytest -vv
 before_deploy:
-- sed -i.bak "s/=get_version()/='$TRAVIS_TAG'/g" setup.py
+- sed -i.bak "s/version=\"2.3.1+mmrf.visibility\"/version=\"$TRAVIS_TAG\"/" setup.py
 - cat setup.py
 - if [ $(python setup.py --version) == '0.0.0' ]; then travis_terminate 1; fi
 deploy:

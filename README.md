@@ -222,3 +222,16 @@ if res.status_code != 200:
 doc = indexclient.global_get("10.1000/182")
 print(doc.did) # >> "g.1234/03eed607-acb0-4532-b0ee-9e3766b1aa6e"
 ```
+
+### Restricted record discovery
+
+Reads and bulk discovery now preserve the client's configured authentication,
+including Gen3's requests-compatible bearer provider and IndexD Basic credentials.
+An explicit per-call authentication override still takes precedence. Anonymous
+clients remain anonymous. Records retain the ordinary existing `authz` field;
+no per-record visibility flag is introduced. With IndexD's site-level
+`PROJECT_VISIBILITY_ENABLED=true` opt-in, reads require `indexd/read-metadata` on
+every `authz` resource. With the flag disabled, existing public metadata behavior
+is preserved. Fence separately authorizes downloads using `fence/read-storage`.
+
+Run isolated transport tests with `pytest --noconftest tests/test_visibility.py`.
